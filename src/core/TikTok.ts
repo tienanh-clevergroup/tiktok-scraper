@@ -302,7 +302,7 @@ export class TikTokScraper extends EventEmitter {
             }
             return {
                 socks: false,
-                proxy,
+                proxy: proxy.replace("http://", ""),
             };
         }
         return {
@@ -812,11 +812,11 @@ export class TikTokScraper extends EventEmitter {
                         verified: posts[i].author.verified,
                         signature: posts[i].author.signature,
                         avatar: posts[i].author.avatarLarger,
-                        following: posts[i].authorStats.followingCount,
-                        fans: posts[i].authorStats.followerCount,
-                        heart: posts[i].authorStats.heartCount,
-                        video: posts[i].authorStats.videoCount,
-                        digg: posts[i].authorStats.diggCount,
+                        following: 0,
+                        fans: 0,
+                        heart: 0,
+                        video: 0,
+                        digg: 0,
                     },
                     ...(posts[i].music
                         ? {
@@ -1281,11 +1281,11 @@ export class TikTokScraper extends EventEmitter {
                 secUid: videoData.author.secUid,
                 name: videoData.author.uniqueId,
                 nickName: videoData.author.nickname,
-                following: videoData.authorStats.followingCount,
-                fans: videoData.authorStats.followerCount,
-                heart: videoData.authorStats.heartCount,
-                video: videoData.authorStats.videoCount,
-                digg: videoData.authorStats.diggCount,
+                following: 0,
+                fans: 0,
+                heart: 0,
+                video: 0,
+                digg: 0,
                 verified: videoData.author.verified,
                 private: videoData.author.secret,
                 signature: videoData.author.signature,

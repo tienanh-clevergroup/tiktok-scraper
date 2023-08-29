@@ -1,6 +1,6 @@
 {
     "name": "tiktok-scraper",
-    "version": "1.4.35",
+    "version": "1.5.1",
     "description": "TikTok Scraper & Downloader. Scrape information from User, Trending and HashTag pages and download video posts",
     "main": "./build/index.js",
     "types": "./build/index.d.ts",
@@ -49,6 +49,7 @@
         "typescript": "^3.8.3"
     },
     "scripts": {
+        "prepare": "rimraf build && tsc",
         "build": "rimraf build && tsc",
         "docker:build": "tsc",
         "format": "prettier --config ./.prettierrc.js --write './src/**/*.ts'",
@@ -75,7 +76,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/drawrowfly/tiktok-scraper.git"
+        "url": "git+https://github.com/tienanh-clevergroup/tiktok-scraper.git"
     },
     "keywords": [
         "TikTok",
