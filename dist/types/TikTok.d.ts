@@ -99,7 +99,9 @@ export interface PostCollector {
         verified: boolean;
         private?: boolean;
         signature: string;
-        avatar: string;
+        avatarLarger?: string;
+        avatarThumb?: string;
+        avatarMedium?: string;
     };
     musicMeta?: {
         musicId: string;
