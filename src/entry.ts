@@ -257,6 +257,7 @@ export const video = async (input: string, options = {} as Options): Promise<any
 };
 
 // eslint-disable-next-line no-unused-vars
+// @ts-ignore
 export const history = async (input: string, options = {} as Options) => {
     let store: string;
 

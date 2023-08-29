@@ -2,13 +2,13 @@
     "name": "tiktok-scraper",
     "version": "1.5.1",
     "description": "TikTok Scraper & Downloader. Scrape information from User, Trending and HashTag pages and download video posts",
-    "main": "./build/index.js",
-    "types": "./build/index.d.ts",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
     "bin": {
         "tiktok-scraper": "bin/cli.js"
     },
     "files": [
-        "build"
+        "dist"
     ],
     "dependencies": {
         "archiver": "^3.1.1",
@@ -49,7 +49,6 @@
         "typescript": "^3.8.3"
     },
     "scripts": {
-        "prepare": "rimraf build && tsc",
         "build": "rimraf build && tsc",
         "docker:build": "tsc",
         "format": "prettier --config ./.prettierrc.js --write './src/**/*.ts'",
