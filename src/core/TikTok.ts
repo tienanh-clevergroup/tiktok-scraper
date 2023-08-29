@@ -812,7 +812,9 @@ export class TikTokScraper extends EventEmitter {
                         nickName: posts[i].author.nickname,
                         verified: posts[i].author.verified,
                         signature: posts[i].author.signature,
-                        avatar: posts[i].author.avatarLarger,
+                        avatarLarger: posts[i].author.avatarLarger,
+                        avatarThumb: posts[i].author.avatarThumb,
+                        avatarMedium: posts[i].author.avatarMedium,
                         following: 0,
                         fans: 0,
                         heart: 0,
@@ -1216,7 +1218,9 @@ export class TikTokScraper extends EventEmitter {
                 const rawVideoMetadata = response.split('<script id="SIGI_STATE" type="application/json">')[1].split('</script>')[0];
 
                 const videoProps = JSON.parse(rawVideoMetadata);
-                const videoData = Object.values(videoProps.ItemModule)[0];
+                let videoData= Object.values(videoProps.ItemModule)[0];
+                // @ts-ignore
+                videoData.author = Object.values(videoProps.UserModule.users)[0];
                 return videoData as FeedItems;
             }
 
@@ -1271,7 +1275,7 @@ export class TikTokScraper extends EventEmitter {
         } else {
             videoData = await this.getVideoMetadata();
         }
-        // @ts-ignore
+        
         const videoItem = {
             id: videoData.id,
             secretID: videoData.video.id,
@@ -1290,7 +1294,9 @@ export class TikTokScraper extends EventEmitter {
                 verified: videoData.author.verified,
                 private: videoData.author.secret,
                 signature: videoData.author.signature,
-                avatar: videoData.author.avatarLarger,
+                avatarLarger: videoData.author.avatarLarger,
+                avatarThumb: videoData.author.avatarThumb,
+                avatarMedium: videoData.author.avatarMedium
             },
             musicMeta: {
                 musicId: videoData.music.id,
@@ -1301,6 +1307,9 @@ export class TikTokScraper extends EventEmitter {
                 coverMedium: videoData.music.coverMedium,
                 coverLarge: videoData.music.coverLarge,
                 duration: videoData.music.duration,
+                playUrl: videoData.music.playUrl,
+                musicAlbum: videoData.music.album
+                
             },
             imageUrl: videoData.video.cover,
             videoUrl: videoData.video.playAddr,
@@ -1318,6 +1327,7 @@ export class TikTokScraper extends EventEmitter {
             covers: {
                 default: videoData.video.cover,
                 origin: videoData.video.originCover,
+                dynamic: videoData.video.dynamicCover
             },
             diggCount: videoData.stats.diggCount,
             shareCount: videoData.stats.shareCount,
