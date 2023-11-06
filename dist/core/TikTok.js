@@ -828,6 +828,12 @@ class TikTokScraper extends events_1.EventEmitter {
                 videoData.author = Object.values(videoProps.UserModule.users)[0];
                 return videoData;
             }
+            if (response.includes('__UNIVERSAL_DATA_FOR_REHYDRATION__')) {
+                const rawVideoMetadata = response.split('<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" type="application/json">')[1].split('</script>')[0];
+                const videoProps = JSON.parse(rawVideoMetadata);
+                let videoData = videoProps["__DEFAULT_SCOPE__"]["webapp.video-detail"].itemInfo.itemStruct;
+                return videoData;
+            }
             throw new Error('No available parser for html page');
         }
         catch (error) {
