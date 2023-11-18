@@ -33,6 +33,7 @@ import {
     Headers,
     WebHtmlUserMetadata,
     VideoMetadata,
+    VideoUnavailable
 } from '../types';
 
 import { Downloader } from '../core';
@@ -1198,43 +1199,48 @@ export class TikTokScraper extends EventEmitter {
             method: 'GET',
             json: true,
         };
-        try {
-            const response = await this.request<string>(options);
-            if (!response) {
-                throw new Error(`Can't extract video meta data`);
-            }
-
-            if (response.includes("__NEXT_DATA__")){
-                const rawVideoMetadata = response
-                    .split(/<script id="__NEXT_DATA__" type="application\/json" nonce="[\w-]+" crossorigin="anonymous">/)[1]
-                    .split(`</script>`)[0];
-
-                const videoProps = JSON.parse(rawVideoMetadata);
-                const videoData = videoProps.props.pageProps.itemInfo.itemStruct;
-                return videoData as FeedItems;
-            }
-
-            if (response.includes('SIGI_STATE')) {
-                const rawVideoMetadata = response.split('<script id="SIGI_STATE" type="application/json">')[1].split('</script>')[0];
-
-                const videoProps = JSON.parse(rawVideoMetadata);
-                let videoData= Object.values(videoProps.ItemModule)[0];
-                // @ts-ignore
-                videoData.author = Object.values(videoProps.UserModule.users)[0];
-                return videoData as FeedItems;
-            } 
-            if (response.includes('__UNIVERSAL_DATA_FOR_REHYDRATION__')) {
-                const rawVideoMetadata = response.split('<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" type="application/json">')[1].split('</script>')[0];
-
-                const videoProps = JSON.parse(rawVideoMetadata);
-                let videoData= videoProps["__DEFAULT_SCOPE__"]["webapp.video-detail"].itemInfo.itemStruct;
-                return videoData as FeedItems;
-            }
-
-            throw new Error('No available parser for html page')
-        } catch (error) {
-            throw new Error(`Can't extract video metadata: ${this.input}`);
+        // try {
+        const response = await this.request<string>(options);
+        if (!response) {
+            throw new Error(`Can't extract video meta data`);
         }
+
+        if (response.includes("__NEXT_DATA__")){
+            const rawVideoMetadata = response
+                .split(/<script id="__NEXT_DATA__" type="application\/json" nonce="[\w-]+" crossorigin="anonymous">/)[1]
+                .split(`</script>`)[0];
+
+            const videoProps = JSON.parse(rawVideoMetadata);
+            const videoData = videoProps.props.pageProps.itemInfo.itemStruct;
+            return videoData as FeedItems;
+        }
+
+        if (response.includes('SIGI_STATE')) {
+            const rawVideoMetadata = response.split('<script id="SIGI_STATE" type="application/json">')[1].split('</script>')[0];
+
+            const videoProps = JSON.parse(rawVideoMetadata);
+            let videoData= Object.values(videoProps.ItemModule)[0];
+            // @ts-ignore
+            videoData.author = Object.values(videoProps.UserModule.users)[0];
+            return videoData as FeedItems;
+        } 
+        if (response.includes('__UNIVERSAL_DATA_FOR_REHYDRATION__')) {
+            const rawVideoMetadata = response.split('<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" type="application/json">')[1].split('</script>')[0];
+
+            const videoProps = JSON.parse(rawVideoMetadata);
+            let videoData= videoProps["__DEFAULT_SCOPE__"]["webapp.video-detail"]
+            if(videoData.statusCode == 10204){
+                throw new VideoUnavailable(`Video is unavailable: ${this.input}`)
+            }
+            videoData = videoData.itemInfo.itemStruct;
+            return videoData as FeedItems;
+        }
+
+        throw new Error('No available parser for html page')
+        // } catch (error) {
+        //     // if()
+        //     throw error
+        // }
     }
 
     /**
