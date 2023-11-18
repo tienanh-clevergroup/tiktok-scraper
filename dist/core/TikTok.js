@@ -15,6 +15,7 @@ const async_1 = require("async");
 const url_1 = require("url");
 const constant_1 = __importDefault(require("../constant"));
 const helpers_1 = require("../helpers");
+const types_1 = require("../types");
 const core_1 = require("../core");
 class TikTokScraper extends events_1.EventEmitter {
     constructor({ download, filepath, filetype, proxy, strictSSL = true, asyncDownload, cli = false, event = false, progress = false, input, number, since, type, by_user_id = false, store_history = false, historyPath = '', noWaterMark = false, useTestEndpoints = false, fileName = '', timeout = 0, bulk = false, zip = false, test = false, hdVideo = false, webHookUrl = '', method = 'POST', headers, verifyFp = '', sessionList = [], }) {
@@ -808,37 +809,36 @@ class TikTokScraper extends events_1.EventEmitter {
             method: 'GET',
             json: true,
         };
-        try {
-            const response = await this.request(options);
-            if (!response) {
-                throw new Error(`Can't extract video meta data`);
-            }
-            if (response.includes("__NEXT_DATA__")) {
-                const rawVideoMetadata = response
-                    .split(/<script id="__NEXT_DATA__" type="application\/json" nonce="[\w-]+" crossorigin="anonymous">/)[1]
-                    .split(`</script>`)[0];
-                const videoProps = JSON.parse(rawVideoMetadata);
-                const videoData = videoProps.props.pageProps.itemInfo.itemStruct;
-                return videoData;
-            }
-            if (response.includes('SIGI_STATE')) {
-                const rawVideoMetadata = response.split('<script id="SIGI_STATE" type="application/json">')[1].split('</script>')[0];
-                const videoProps = JSON.parse(rawVideoMetadata);
-                let videoData = Object.values(videoProps.ItemModule)[0];
-                videoData.author = Object.values(videoProps.UserModule.users)[0];
-                return videoData;
-            }
-            if (response.includes('__UNIVERSAL_DATA_FOR_REHYDRATION__')) {
-                const rawVideoMetadata = response.split('<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" type="application/json">')[1].split('</script>')[0];
-                const videoProps = JSON.parse(rawVideoMetadata);
-                let videoData = videoProps["__DEFAULT_SCOPE__"]["webapp.video-detail"].itemInfo.itemStruct;
-                return videoData;
-            }
-            throw new Error('No available parser for html page');
+        const response = await this.request(options);
+        if (!response) {
+            throw new Error(`Can't extract video meta data`);
         }
-        catch (error) {
-            throw new Error(`Can't extract video metadata: ${this.input}`);
+        if (response.includes("__NEXT_DATA__")) {
+            const rawVideoMetadata = response
+                .split(/<script id="__NEXT_DATA__" type="application\/json" nonce="[\w-]+" crossorigin="anonymous">/)[1]
+                .split(`</script>`)[0];
+            const videoProps = JSON.parse(rawVideoMetadata);
+            const videoData = videoProps.props.pageProps.itemInfo.itemStruct;
+            return videoData;
         }
+        if (response.includes('SIGI_STATE')) {
+            const rawVideoMetadata = response.split('<script id="SIGI_STATE" type="application/json">')[1].split('</script>')[0];
+            const videoProps = JSON.parse(rawVideoMetadata);
+            let videoData = Object.values(videoProps.ItemModule)[0];
+            videoData.author = Object.values(videoProps.UserModule.users)[0];
+            return videoData;
+        }
+        if (response.includes('__UNIVERSAL_DATA_FOR_REHYDRATION__')) {
+            const rawVideoMetadata = response.split('<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" type="application/json">')[1].split('</script>')[0];
+            const videoProps = JSON.parse(rawVideoMetadata);
+            let videoData = videoProps["__DEFAULT_SCOPE__"]["webapp.video-detail"];
+            if (videoData.statusCode == 10204) {
+                throw new types_1.VideoUnavailable(`Video is unavailable: ${this.input}`);
+            }
+            videoData = videoData.itemInfo.itemStruct;
+            return videoData;
+        }
+        throw new Error('No available parser for html page');
     }
     async getVideoMetadata(url = '') {
         const videoData = /tiktok.com\/(@[\w.-]+)\/video\/(\d+)/.exec(url || this.input);
